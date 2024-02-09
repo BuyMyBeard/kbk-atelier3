@@ -98,7 +98,7 @@
     const yearWidth = 6.5;
     const verticalOffset = 5;
     const horizontalOffset = 10;
-    const mouseIsDown = false;
+    let mouseIsDown = false;
     var timeId = null;
 
     init_UI();
@@ -143,9 +143,33 @@
     }
 
     async function drawGraph() {
-        dataRows = [];
+        
+        await google.charts.load('current', {'packages':['bar']});
         hurricanesData = await GetHurricanesData();
-        // todo 
+
+        const preppedData = hurricanesData.map((yearData) => [
+            yearData.Year,
+            yearData.Storm,
+            yearData.Cat1 + yearData.Cat2,
+            yearData.Cat3 + yearData.Cat4 + yearData.Cat5,
+        ]);
+        preppedData.unshift([
+            'Année',
+            'Tempêtes tropicales',
+            'Ouragans mineurs (catégories 1 et 2)',
+            'Ouragans majeurs (catégories 3 à 5)',
+        ]);
+        const data = google.visualization.arrayToDataTable(preppedData);
+        const options = {
+            title: 'Historique des tempêtes de l\'Atlantique entre 1950 et 2023',
+            width: '100%',
+            legend: "top",
+            bars: 'vertical', // Required for Material Bar Charts.
+        };
+
+        const chart = new google.visualization.ColumnChart(document.getElementById('graphContainer'));
+
+        chart.draw(data, options);
     };
 
     function GetHurricanesData() {
