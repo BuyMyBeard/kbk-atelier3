@@ -164,7 +164,12 @@
             title: 'Historique des tempêtes de l\'Atlantique entre 1950 et 2023',
             width: '100%',
             legend: "top",
-            bars: 'vertical', // Required for Material Bar Charts.
+            bars: 'vertical',
+            vAxis: {
+                gridlines: {
+                    count: 10,
+                },
+            },
         };
 
         const chart = new google.visualization.ColumnChart(document.getElementById('graphContainer'));
