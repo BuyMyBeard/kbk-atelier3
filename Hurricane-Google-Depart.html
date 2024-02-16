@@ -27,6 +27,7 @@
             width: 100%;
             height: 820px;
             background-color: lightgray;
+            margin:auto;
         }
     </style>
     <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
@@ -34,7 +35,7 @@
 
 <body>
     <div style="margin:auto; width:96%;text-align: center;">
-        <div id="graphContainer" style="margin:auto;"></div>
+        <div id="graphContainer"></div>
     </div>
     <div>
     </div>
@@ -52,11 +53,11 @@
             <legend>Type</legend>
             <div class="checkboxContainer">
                 <input type="checkbox" id="showStorm" checked>
-                <div style="background-color: green;">&nbsp;</div>
+                <div style="background-color: #008000;">&nbsp;</div>
                 <input type="checkbox" id="showHurricane_12" checked>
-                <div style="background-color: orange;">&nbsp;</div>
+                <div style="background-color: #ffa500;">&nbsp;</div>
                 <input type="checkbox" id="showHurricane_345" checked>
-                <div style="background-color: red;">&nbsp;</div>
+                <div style="background-color: #ff0000;">&nbsp;</div>
             </div>
         </fieldset>
         <fieldset>
@@ -87,13 +88,13 @@
 
     let hurricanesData;
     let dataRows;
-    const graphStyle = "bars";
-    const showStorm = true;
-    const showHurricane_12 = true;
-    const showHurricane_345 = true;
+    let graphStyle = "bars";
+    let showStorm = true;
+    let showHurricane_12 = true;
+    let showHurricane_345 = true;
     const viewPortMaxUnitX = 500;
     const viewPortMaxUnitY = 240;
-    const viewport = null;
+    let viewport = null;
     const verticalScale = 5;
     const yearWidth = 6.5;
     const verticalOffset = 5;
@@ -149,9 +150,9 @@
 
         const preppedData = hurricanesData.map((yearData) => [
             yearData.Year,
-            yearData.Storm,
-            yearData.Cat1 + yearData.Cat2,
-            yearData.Cat3 + yearData.Cat4 + yearData.Cat5,
+            showStorm ? yearData.Storm : 0,
+            showHurricane_12 ? yearData.Cat1 + yearData.Cat2 : 0,
+            showHurricane_345 ? yearData.Cat3 + yearData.Cat4 + yearData.Cat5 : 0,
         ]);
         preppedData.unshift([
             'Année',
@@ -162,18 +163,67 @@
         const data = google.visualization.arrayToDataTable(preppedData);
         const options = {
             title: 'Historique des tempêtes de l\'Atlantique entre 1950 et 2023',
+            titleTextStyle: {
+                fontSize: 30,
+                bold: false,
+                align: 'center',
+
+            },
             width: '100%',
             legend: "top",
             bars: 'vertical',
             vAxis: {
+                // ticks: Array(17).fill().map((element, index) => index * 2),
                 gridlines: {
-                    count: 10,
+                    interval: [1, 2],
                 },
+                minorGridlines: {
+                    color: 'transparent',
+                },
+                viewWindow: {
+                    min: 0,
+                },
+                format: '####',
             },
+            hAxis: {
+                gridlines: {
+                    interval: [1, 2, 5],
+                    color: 'transparent',
+                },
+                minorGridlines: {
+                    color: 'transparent',
+                },
+                format: '####',
+
+            },
+            chartArea: {
+                width: '95%', 
+                height: '80%'
+            },
+            bar: {
+                groupWidth: '85%',
+                color: ["red", "red", "blue"]
+            },
+            colors: ['#008000', '#FFA500', '#FF0000'],
+            curveType: 'function',
+            lineWidth: 1,
         };
 
-        const chart = new google.visualization.ColumnChart(document.getElementById('graphContainer'));
+        let chart;
+        switch(graphStyle) {
+            case 'bars': 
+                chart = new google.visualization.ColumnChart(document.getElementById('graphContainer'));
+                break;
+            
+            case 'regions':
+                chart = new google.visualization.AreaChart(document.getElementById('graphContainer'));
+                break;
 
+            case 'curves':
+                chart = new google.visualization.LineChart(document.getElementById('graphContainer'));
+                break;
+        }
+        
         chart.draw(data, options);
     };
 
